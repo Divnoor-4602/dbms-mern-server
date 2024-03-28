@@ -3,11 +3,11 @@ import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
-import multer from "multer";
 import morgan from "morgan";
 import helmet, { crossOriginResourcePolicy } from "helmet";
 import path from "path";
 import { fileURLToPath } from "url";
+import userRouter from "./routes/user-routes.js";
 
 // CONFIGURATIONS
 const __filename = fileURLToPath(import.meta.url);
@@ -24,17 +24,22 @@ app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 app.use(cors());
 app.use("/assets", express.static(path.join(__dirname, "public/assets")));
 
-// FILE STORAGE
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "public/assets");
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.originalname);
-  },
+// importing routes
+app.use("/api/users", userRouter);
+
+// error handler middlewear to handle custom http-error
+app.use((error, req, res, next) => {
+  res.setHeader("Content-Type", "application/json");
+  res.status(error.code || 500).json({
+    message: error.message || "An unknown error occurred!",
+  });
 });
 
-const upload = multer({ storage: storage });
+// 404 error handler
+app.use((req, res, next) => {
+  const error = new HttpError(404, "Route not found");
+  throw error;
+});
 
 // MONGOOSE SETUP
 const PORT = process.env.PORT || 6060;
