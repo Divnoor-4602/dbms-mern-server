@@ -1,6 +1,7 @@
 import express from "express";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
+import HttpError from "./models/http-error.js";
 import cors from "cors";
 import dotenv from "dotenv";
 import morgan from "morgan";
@@ -8,6 +9,7 @@ import helmet, { crossOriginResourcePolicy } from "helmet";
 import path from "path";
 import { fileURLToPath } from "url";
 import userRouter from "./routes/user-routes.js";
+import postRouter from "./routes/post-routes.js";
 
 // CONFIGURATIONS
 const __filename = fileURLToPath(import.meta.url);
@@ -26,6 +28,7 @@ app.use("/assets", express.static(path.join(__dirname, "public/assets")));
 
 // importing routes
 app.use("/api/users", userRouter);
+app.use("/api/posts", postRouter);
 
 // error handler middlewear to handle custom http-error
 app.use((error, req, res, next) => {
@@ -49,6 +52,8 @@ mongoose
     app.listen(PORT, () => {
       console.log(`Server is running on PORT ${PORT}`);
     });
+    // User.insertMany(users);
+    // Post.insertMany(posts);
   })
   .catch((err) => {
     console.log(err);
