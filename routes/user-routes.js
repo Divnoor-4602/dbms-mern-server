@@ -30,7 +30,14 @@ const upload = multer({ storage: storage });
 // REGISTER ROUTE
 userRouter.post(
   "/register",
-  [check("email").not().isEmpty(), check("password").isLength({ min: "7" })],
+  [
+    check("email").not().isEmpty(),
+    check("password").isLength({ min: "7" }),
+    check("firstName").not().isEmpty(),
+    check("lastName").not().isEmpty(),
+    check("location").not().isEmpty(),
+    check("occupation").not().isEmpty(),
+  ],
   upload.single("picture"),
   register
 );

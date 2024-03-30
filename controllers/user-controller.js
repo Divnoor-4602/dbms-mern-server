@@ -1,6 +1,7 @@
 import HttpError from "../models/http-error.js";
 import User from "../models/User.js";
 import { checkAuth } from "../middleware/checkAuth.js";
+import { validationResult } from "express-validator";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
@@ -8,6 +9,15 @@ import bcrypt from "bcrypt";
 
 // REGISTER USER
 const register = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const error = new HttpError(
+      "Invalid inputs passed, please check your data",
+      422
+    );
+    return next(error);
+  }
+
   const {
     firstName,
     lastName,
@@ -65,20 +75,46 @@ const register = async (req, res, next) => {
   // create a jwt token on successfully saving the user
   let token;
   try {
-    token = jwt(
+    token = jwt.sign(
       { userId: newUser.id, email: newUser.email },
       process.env.JWT_KEY,
       { expiresIn: "1hr" }
     );
   } catch (error) {
     const err = new HttpError("Signing up failed, try again later", 500);
+    return next(err);
   }
 
-  res.status(201).json({ message: "User created successfullyl" });
+  // return the user details
+  const userDetailsToReturn = {
+    id: newUser.id,
+    firstName: newUser.firstName,
+    lastName: newUser.lastName,
+    email: newUser.email,
+    location: newUser.location,
+    occupation: newUser.occupation,
+    picturePath: newUser.picturePath,
+    viewedProfile: newUser.viewedProfile,
+    impression: newUser.impression,
+  };
+
+  res.status(201).json({
+    message: "User created successfully",
+    user: userDetailsToReturn,
+    token,
+  });
 };
 
 // LOGIN USER
 const login = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const error = new HttpError(
+      "Invalid inputs passed, please check your data",
+      422
+    );
+    return next(error);
+  }
   const { email, password } = req.body;
 
   // check if the email exists
@@ -133,10 +169,24 @@ const login = async (req, res, next) => {
     return next(error);
   }
 
+  const userDetailsToReturn = {
+    id: newUser.id,
+    firstName: newUser.firstName,
+    lastName: newUser.lastName,
+    email: newUser.email,
+    location: newUser.location,
+    occupation: newUser.occupation,
+    picturePath: newUser.picturePath,
+    viewedProfile: newUser.viewedProfile,
+    impression: newUser.impression,
+  };
+
   // if the password matches return a success json
-  res
-    .status(200)
-    .json({ message: "Successfully logged in!", user: user, token: token });
+  res.status(200).json({
+    message: "Successfully logged in!",
+    user: userDetailsToReturn,
+    token: token,
+  });
 };
 
 // GET USER
