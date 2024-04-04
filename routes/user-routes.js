@@ -8,39 +8,12 @@ import {
   addFriends,
 } from "../controllers/user-controller.js";
 import { check } from "express-validator";
-import multer from "multer";
+
 import { checkAuth } from "../middleware/checkAuth.js";
 
 const userRouter = express.Router();
 
-// FILE STORAGE
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "public/assets");
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.originalname);
-  },
-});
-
-const upload = multer({ storage: storage });
-
 // ROUTES
-
-// REGISTER ROUTE
-userRouter.post(
-  "/register",
-  [
-    check("email").not().isEmpty(),
-    check("password").isLength({ min: "7" }),
-    check("firstName").not().isEmpty(),
-    check("lastName").not().isEmpty(),
-    check("location").not().isEmpty(),
-    check("occupation").not().isEmpty(),
-  ],
-  upload.single("picture"),
-  register
-);
 
 // LOGIN ROUTE
 userRouter.post(
@@ -56,7 +29,7 @@ userRouter.get("/:id", getUser);
 userRouter.get("/friends/:id", getUserFriends);
 
 // ADD REMOVE USER FRIENDS
-userRouter.patch("/friends/remove/:id/:friendId", checkAuth, removeFriends);
-userRouter.patch("/friends/add/:id/:friendId", checkAuth, addFriends);
+userRouter.patch("/friends/add/:userId/:friendId", addFriends);
+userRouter.patch("/friends/remove/:userId/:friendId", removeFriends);
 
 export default userRouter;

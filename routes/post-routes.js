@@ -9,10 +9,8 @@ import { checkAuth } from "../middleware/checkAuth.js";
 
 const postRouter = express.Router();
 
-postRouter.use(checkAuth);
-postRouter.post("/create", createPost);
 postRouter.get("/feed", getPostFeed);
+postRouter.patch("/like/:id", likePost);
 postRouter.get("user-posts/:id", getUserPosts);
-postRouter.patch("like/:id", likePost);
 
 export default postRouter;
